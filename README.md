@@ -8,6 +8,8 @@
   object detector from checkpoint files.
 * `saved_model_server.py` will start a Gabriel server to process frames using an
   object detector from saved model files.
+* `remove_dup.py` creates a new version of a tfrecord file where each image has
+  a unique perceptual hash value.
 
 ## Usage
 
@@ -26,3 +28,5 @@ from `~/models/research` in the container.
 The two server scripts in this repository work with the clients in
 [this](https://github.com/cmusatyalab/gabriel/tree/master/examples/round_trip)
 directory.
+
+Run `python3 -m pip install imagehash` to use `remove_dup.py`.
