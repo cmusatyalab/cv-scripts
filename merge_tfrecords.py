@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import tensorflow as tf
@@ -11,9 +12,10 @@ import glob
 
 
 DEFAULT_CLASS_TEXT = 'default'
+SINGLE_CLASS_NUM = 1
 
-TFRECORD_NAME = 'single_class.tfrecord'
-LABEL_MAP_NAME = 'single_class_label_map.pbtxt'
+TFRECORD_NAME = 'merged.tfrecord'
+LABEL_MAP_NAME = 'label_map.pbtxt'
 
 IMAGE_FEATURE_DESCRIPTION = {
     'image/height': tf.io.FixedLenFeature([], tf.int64),
@@ -63,14 +65,16 @@ def create_tf_example(parsed, class_text, class_num):
 
 
 def main():
-    class_num = 1
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--combine-labels', action='store_true')
+    args = parser.parse_args()
+    combine_labels = args.combine_labels
+
     label_map = string_int_label_map_pb2.StringIntLabelMap()
     writer = tf.io.TFRecordWriter(TFRECORD_NAME)
 
-    item = string_int_label_map_pb2.StringIntLabelMapItem()
-    item.id = class_num
-    item.name = DEFAULT_CLASS_TEXT
-    label_map.item.append(item)
+    class_nums = {}
+    next_class_num = 1
 
     for dataset_dir in glob.glob(os.path.join('input', '*')):
         print(dataset_dir)
@@ -87,11 +91,28 @@ def main():
             if num_values != 1:
                 raise Exception
 
+            if combine_labels:
+                class_text = DEFAULT_CLASS_TEXT
+                class_num = SINGLE_CLASS_NUM
+            else:
+                class_text = parsed['image/object/class/text'].values[0].decode(
+                    'utf8')
+                class_num = class_nums.get(class_text)
+                if class_num is None:
+                    class_nums[class_text] = next_class_num
+                    class_num = next_class_num
+                    next_class_num += 1
+
             tf_example = create_tf_example(
-                parsed, DEFAULT_CLASS_TEXT, class_num)
+                parsed, class_text, class_num)
             writer.write(tf_example.SerializeToString())
 
     writer.close()
+
+    item = string_int_label_map_pb2.StringIntLabelMapItem()
+    item.id = class_num
+    item.name = DEFAULT_CLASS_TEXT
+    label_map.item.append(item)
     with open(LABEL_MAP_NAME, 'w') as f:
         f.write(text_format.MessageToString(label_map))
 
