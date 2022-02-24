@@ -95,8 +95,8 @@ def main():
                 class_text = DEFAULT_CLASS_TEXT
                 class_num = SINGLE_CLASS_NUM
             else:
-                class_text = parsed['image/object/class/text'].values[0].decode(
-                    'utf8')
+                class_text = (parsed['image/object/class/text'].values[0]
+                              .numpy().decode('utf8'))
                 class_num = class_nums.get(class_text)
                 if class_num is None:
                     class_nums[class_text] = next_class_num
