@@ -109,10 +109,18 @@ def main():
 
     writer.close()
 
-    item = string_int_label_map_pb2.StringIntLabelMapItem()
-    item.id = class_num
-    item.name = DEFAULT_CLASS_TEXT
-    label_map.item.append(item)
+    if combine_labels:
+        item = string_int_label_map_pb2.StringIntLabelMapItem()
+        item.id = SINGLE_CLASS_NUM
+        item.name = DEFAULT_CLASS_TEXT
+        label_map.item.append(item)
+    else:
+        for item_name, item_id in class_nums.items():
+            item = string_int_label_map_pb2.StringIntLabelMapItem()
+            item.id = item_id
+            item.name = item_name
+            label_map.item.append(item)    
+
     with open(LABEL_MAP_NAME, 'w') as f:
         f.write(text_format.MessageToString(label_map))
 
