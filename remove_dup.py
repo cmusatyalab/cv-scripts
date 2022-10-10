@@ -44,7 +44,7 @@ def create_tf_example(parsed):
     xmaxs = [value.numpy() for value in parsed['image/object/bbox/xmax'].values]
     ymins = [value.numpy() for value in parsed['image/object/bbox/ymin'].values]
     ymaxs = [value.numpy() for value in parsed['image/object/bbox/ymax'].values]
-    class_text = parsed['image/object/class/text'].numpy()[0]
+    class_text = parsed['image/object/class/text'].values.numpy()[0]
     label = parsed['image/object/class/label'].numpy()[0]
 
     tf_example = tf.train.Example(features=tf.train.Features(feature={
