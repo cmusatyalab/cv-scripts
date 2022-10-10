@@ -78,8 +78,8 @@ def main():
 
     for dataset_dir in glob.glob(os.path.join('input', '*')):
         print(dataset_dir)
-        full_dataset_path = os.path.join(dataset_dir, 'default.tfrecord')
-        dataset = tf.data.TFRecordDataset(full_dataset_path)
+        # full_dataset_path = os.path.join(dataset_dir, 'default.tfrecord')
+        dataset = tf.data.TFRecordDataset(dataset_dir)
 
         it = iter(dataset)
         for value in it:
@@ -95,7 +95,7 @@ def main():
                 class_text = DEFAULT_CLASS_TEXT
                 class_num = SINGLE_CLASS_NUM
             else:
-                class_text = parsed['image/object/class/text'].values[0].decode(
+                class_text = parsed['image/object/class/text'].values[0].numpy().decode(
                     'utf8')
                 class_num = class_nums.get(class_text)
                 if class_num is None:
