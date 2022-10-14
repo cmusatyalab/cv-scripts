@@ -76,10 +76,10 @@ def main():
     class_nums = {}
     next_class_num = 1
 
-    for dataset_dir in glob.glob(os.path.join('input', '*')):
-        print(dataset_dir)
-        # full_dataset_path = os.path.join(dataset_dir, 'default.tfrecord')
-        dataset = tf.data.TFRecordDataset(dataset_dir)
+    count = 0
+    for tfr_file in glob.glob(os.path.join('input', '*')):
+        print(tfr_file)
+        dataset = tf.data.TFRecordDataset(tfr_file)
 
         it = iter(dataset)
         for value in it:
@@ -106,8 +106,10 @@ def main():
             tf_example = create_tf_example(
                 parsed, class_text, class_num)
             writer.write(tf_example.SerializeToString())
+            count += 1
 
     writer.close()
+    print('total', count)
 
     if combine_labels:
         item = string_int_label_map_pb2.StringIntLabelMapItem()
@@ -119,7 +121,7 @@ def main():
             item = string_int_label_map_pb2.StringIntLabelMapItem()
             item.id = item_id
             item.name = item_name
-            label_map.item.append(item)    
+            label_map.item.append(item)
 
     with open(LABEL_MAP_NAME, 'w') as f:
         f.write(text_format.MessageToString(label_map))
